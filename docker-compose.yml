@@ -1,8 +1,8 @@
 services:
   web:
     image: ghcr.io/ivucicev/pushnest:main
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       DATABASE_URL: file:./data/pushnest.db
       NEXT_PUBLIC_APP_URL: https://push.yourcompany.com
