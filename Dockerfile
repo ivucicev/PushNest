@@ -3,12 +3,13 @@ WORKDIR /app
 
 # Install deps
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++
 COPY package*.json ./
 RUN npm ci
 
 # Build
 FROM base AS builder
+RUN apk add --no-cache libc6-compat python3 make g++
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
