@@ -1,0 +1,22 @@
+services:
+  web:
+    image: ghcr.io/ivucicev/pushnest:main
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:./data/pushnest.db
+      NEXT_PUBLIC_APP_URL: https://push.yourcompany.com
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+
+  worker:
+    image: ghcr.io/ivucicev/pushnest:main
+    command: node src/worker/index.js
+    environment:
+      DATABASE_URL: file:./data/pushnest.db
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - web
+    restart: unless-stopped

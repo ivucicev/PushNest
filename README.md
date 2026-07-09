@@ -20,6 +20,8 @@ That's it. Every subscribed browser gets the notification.
 
 ---
 
+![PushNest homepage](screenshots/screenshot-homepage.png)
+
 ## Why PushNest
 
 Most teams skip web push because the setup is painful — VAPID keys, push endpoints, payload encryption, 410 handling, retry logic. PushNest does all of it so you don't have to.
@@ -52,6 +54,8 @@ Self-host it. Own your data. Zero vendor lock-in.
 - **Cross-platform** — Chrome, Firefox, Edge, Safari 16+, iOS PWA, Android, macOS, Windows.
 
 ---
+
+![Apps dashboard](screenshots/screenshot-apps.png)
 
 ## Get started in 5 minutes
 
@@ -181,6 +185,8 @@ Authorization: Bearer YOUR_API_KEY
 ---
 
 ## Webhooks
+
+![Webhooks dashboard](screenshots/screenshot-webhooks.png)
 
 Get notified on every delivery event. PushNest signs every request with HMAC-SHA256.
 
