@@ -20,8 +20,8 @@ RUN node_modules/.bin/esbuild src/worker/index.ts \
   --bundle \
   --platform=node \
   --target=node22 \
-  --outfile=.next/standalone/worker.js \
-  --external:@libsql/client
+  --outfile=worker.js \
+  --external:@libsql/client && ls -lh worker.js
 
 # Runner
 FROM base AS runner
@@ -37,6 +37,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/worker.js ./worker.js
 COPY --from=builder /app/node_modules/@libsql ./node_modules/@libsql
 
 USER nextjs
