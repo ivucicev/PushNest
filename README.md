@@ -1,219 +1,268 @@
 # PushNest
 
-Web push notifications as a service. Register browsers, send via API or dashboard, schedule campaigns, track every delivery. No push server to run.
+**Send web push notifications from your backend in 30 seconds.**
 
-![Build](https://github.com/ivucicev/PushNest/actions/workflows/docker.yml/badge.svg)
+No push server. No VAPID key management. No delivery code. Just a POST request.
 
----
-
-## What it does
-
-- **Subscribe** — two lines of JS registers any browser (Chrome, Firefox, Edge, Safari 16+, iOS PWA)
-- **Send** — one POST delivers to all subscribers or targets by user ID
-- **Schedule** — pass `scheduledAt` to fire at a specific time
-- **Track** — delivery logs per subscriber, click tracking, webhook events
-- **Dashboard** — full UI to manage apps, send campaigns, view logs
+[![Build](https://github.com/ivucicev/PushNest/actions/workflows/docker.yml/badge.svg)](https://github.com/ivucicev/PushNest/actions)
+[![Docker](https://img.shields.io/badge/ghcr.io-ivucicev%2Fpushnest-blue)](https://ghcr.io/ivucicev/pushnest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
 
-## Run locally
-
-### Requirements
-
-- Node.js 22+
-
-### 1. Clone and install
-
 ```bash
-git clone https://github.com/ivucicev/force.git
-cd force
-npm install
+curl -X POST https://your-pushnest.com/api/v1/send \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{ "title": "Order shipped 📦", "body": "Your order is on its way!" }'
 ```
 
-### 2. Configure
-
-```bash
-echo 'DATABASE_URL="file:./prisma/dev.db"' > .env
-echo 'NEXT_PUBLIC_APP_URL="http://localhost:3000"' >> .env
-```
-
-### 3. Set up database
-
-```bash
-npx prisma migrate deploy
-npx prisma generate
-```
-
-### 4. Start
-
-```bash
-# Terminal 1 — web app
-npm run dev
-
-# Terminal 2 — notification worker (required for delivery)
-npm run worker
-```
-
-Open [http://localhost:3000](http://localhost:3000), register, create an app.
+That's it. Every subscribed browser gets the notification.
 
 ---
 
-## Docker
+## Why PushNest
+
+Most teams skip web push because the setup is painful — VAPID keys, push endpoints, payload encryption, 410 handling, retry logic. PushNest does all of it so you don't have to.
+
+| Without PushNest | With PushNest |
+|-----------------|---------------|
+| Generate & store VAPID keys | Auto-generated per app |
+| Build subscribe/unsubscribe endpoints | Single hosted endpoint |
+| Manage push endpoints per user | We store and fan out |
+| Handle 410 expired subscriptions | Auto-cleaned |
+| Write retry logic | Built-in retry |
+| Debug delivery failures | Per-delivery logs + status codes |
+| Schedule notifications | `scheduledAt` param |
+
+Self-host it. Own your data. Zero vendor lock-in.
+
+---
+
+## Features
+
+- **REST API** — one endpoint to send, one to subscribe. Works from any backend or cURL.
+- **Dashboard** — send campaigns, view delivery logs, manage subscribers — no code needed.
+- **Scheduling** — pass `scheduledAt` to fire at a specific UTC time. Cancel any time before delivery.
+- **Audience targeting** — broadcast to all, or send to specific users by `externalUserId`.
+- **Click tracking** — know exactly who clicked and when. CTR per notification.
+- **Webhooks** — get POSTed on `sent`, `failed`, `clicked`, `expired`. HMAC-signed.
+- **Retry failed** — re-queue failed deliveries with one click or one API call.
+- **Multi-app** — one account, unlimited apps, each with isolated VAPID keys and API keys.
+- **Auto-expire** — dead subscriptions (404/410) cleaned automatically. No stale data.
+- **Cross-platform** — Chrome, Firefox, Edge, Safari 16+, iOS PWA, Android, macOS, Windows.
+
+---
+
+## Get started in 5 minutes
+
+### 1. Deploy (one command)
 
 ```bash
-docker pull ghcr.io/ivucicev/force:main
-
 docker run -d \
   -p 3000:3000 \
   -e DATABASE_URL="file:./data/pushnest.db" \
-  -e NEXT_PUBLIC_APP_URL="https://yourdomain.com" \
+  -e NEXT_PUBLIC_APP_URL="https://push.yourcompany.com" \
   -v $(pwd)/data:/app/data \
-  ghcr.io/ivucicev/force:main
+  ghcr.io/ivucicev/pushnest:main
 ```
 
-Worker (run alongside):
+### 2. Create an account
 
-```bash
-docker run -d \
-  -e DATABASE_URL="file:./data/pushnest.db" \
-  -v $(pwd)/data:/app/data \
-  ghcr.io/ivucicev/force:main \
-  node src/worker/index.js
-```
+Open `https://push.yourcompany.com`, register, and create your first app. Your VAPID keys and API key are generated instantly.
 
-**docker-compose:**
+### 3. Add two snippets to your frontend
 
-```yaml
-version: "3.9"
-services:
-  web:
-    image: ghcr.io/ivucicev/force:main
-    ports: ["3000:3000"]
-    environment:
-      DATABASE_URL: file:./data/pushnest.db
-      NEXT_PUBLIC_APP_URL: https://yourdomain.com
-    volumes: ["./data:/app/data"]
+**`/push-sw.js`** — copy from [public/push-sw.js](public/push-sw.js) to your web root.
 
-  worker:
-    image: ghcr.io/ivucicev/force:main
-    command: node src/worker/index.js
-    environment:
-      DATABASE_URL: file:./data/pushnest.db
-    volumes: ["./data:/app/data"]
-    depends_on: [web]
-```
-
----
-
-## Integration tutorial
-
-### Step 1 — Add the service worker
-
-Copy [`public/push-sw.js`](public/push-sw.js) to your web app's public root.
-
-### Step 2 — Subscribe the browser
+**Subscribe users:**
 
 ```js
-async function subscribeToPush() {
+async function enableNotifications() {
   const reg = await navigator.serviceWorker.register('/push-sw.js');
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') return;
 
   const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY', // from Dashboard → App → Integration
+    applicationServerKey: 'YOUR_VAPID_PUBLIC_KEY',  // Dashboard → Integration
   });
 
   const { endpoint, keys } = sub.toJSON();
-  await fetch('https://your-pushnest.com/api/v1/apps/APP_ID/subscribe', {
+  await fetch('https://push.yourcompany.com/api/v1/apps/APP_ID/subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ endpoint, p256dh: keys.p256dh, auth: keys.auth }),
+    body: JSON.stringify({
+      endpoint,
+      p256dh: keys.p256dh,
+      auth: keys.auth,
+      externalUserId: currentUser.id,  // optional, for targeting
+    }),
   });
 }
 ```
 
-### Step 3 — Send
+### 4. Send from your backend
 
-```bash
-# Send to all subscribers
-curl -X POST https://your-pushnest.com/api/v1/send \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{ "title": "Hello!", "body": "Your order shipped.", "url": "https://yourapp.com" }'
+```js
+// Node.js
+await fetch('https://push.yourcompany.com/api/v1/send', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    title: 'Your order shipped 📦',
+    body: 'Estimated delivery: tomorrow',
+    url: 'https://yourapp.com/orders/123',
+    audience: { externalUserIds: ['user_456'] },
+  }),
+});
+```
 
-# Schedule for later
-curl -X POST https://your-pushnest.com/api/v1/send \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{ "title": "Weekly digest", "scheduledAt": "2025-01-15T09:00:00Z" }'
+**Schedule for later:**
 
-# Target specific users
-curl -X POST https://your-pushnest.com/api/v1/send \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{ "title": "Your order shipped", "audience": { "externalUserIds": ["user_123"] } }'
+```js
+body: JSON.stringify({
+  title: 'Weekly digest',
+  scheduledAt: '2025-02-01T09:00:00Z',
+})
+```
+
+**Broadcast to everyone:**
+
+```js
+body: JSON.stringify({
+  title: 'New feature just dropped 🚀',
+  body: 'Dark mode is here.',
+})
+// audience omitted = sends to all active subscribers
 ```
 
 ---
 
-## API
+## API reference
+
+### Send a notification
+
+```
+POST /api/v1/send
+Authorization: Bearer YOUR_API_KEY
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | string | Notification title (required) |
+| `body` | string | Notification body |
+| `url` | string | URL to open on click |
+| `icon` | string | Icon URL |
+| `tag` | string | Replaces existing notification with same tag |
+| `scheduledAt` | ISO 8601 | Schedule for later (UTC) |
+| `audience.all` | boolean | Send to all subscribers (default) |
+| `audience.externalUserIds` | string[] | Target specific users |
+| `audience.subscriptionIds` | string[] | Target specific subscriptions |
+
+**Response:**
+```json
+{ "ok": true, "notificationId": "clx...", "queued": 1284, "scheduled": false }
+```
+
+### Other endpoints
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | `POST` | `/api/v1/apps/:id/subscribe` | none | Register browser |
 | `DELETE` | `/api/v1/apps/:id/unsubscribe` | none | Unsubscribe browser |
-| `POST` | `/api/v1/send` | API key | Send notification |
 | `POST` | `/api/v1/apps/:id/notifications/:id/cancel` | API key | Cancel scheduled |
 | `POST` | `/api/v1/apps/:id/notifications/:id/retry` | API key | Retry failed |
 | `POST` | `/api/v1/track/click` | none | Track click |
 | `GET/POST` | `/api/v1/apps/:id/webhooks` | session | Manage webhooks |
 
-**Send payload:**
+---
 
-```json
-{
-  "title": "string (required)",
-  "body": "string",
-  "url": "string",
-  "icon": "string",
-  "tag": "string",
-  "scheduledAt": "ISO 8601",
-  "audience": {
-    "all": true,
-    "externalUserIds": ["user_123"],
-    "subscriptionIds": ["sub_abc"]
-  }
+## Webhooks
+
+Get notified on every delivery event. PushNest signs every request with HMAC-SHA256.
+
+**Events:** `notification.sent` · `notification.failed` · `notification.expired` · `notification.scheduled` · `notification.cancelled` · `subscription.new` · `subscription.expired`
+
+**Verify the signature:**
+
+```js
+const crypto = require('crypto');
+
+function verifyWebhook(rawBody, signature, secret) {
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex');
+  return expected === signature;
+}
+
+// In your handler:
+const sig = req.headers['x-pushnest-signature'];
+if (!verifyWebhook(req.rawBody, sig, process.env.PUSHNEST_WEBHOOK_SECRET)) {
+  return res.status(401).end();
 }
 ```
 
 ---
 
-## Webhooks
+## Self-hosting
 
-PushNest POSTs signed requests to your URL on:
+### docker-compose (recommended)
 
-`notification.sent` · `notification.failed` · `notification.expired` · `notification.scheduled` · `notification.cancelled` · `subscription.new` · `subscription.expired`
+```yaml
+version: "3.9"
+services:
+  web:
+    image: ghcr.io/ivucicev/pushnest:main
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: file:./data/pushnest.db
+      NEXT_PUBLIC_APP_URL: https://push.yourcompany.com
+    volumes: ["./data:/app/data"]
+    restart: unless-stopped
 
-Verify with `X-PushNest-Signature` (HMAC-SHA256):
+  worker:
+    image: ghcr.io/ivucicev/pushnest:main
+    command: node src/worker/index.js
+    environment:
+      DATABASE_URL: file:./data/pushnest.db
+    volumes: ["./data:/app/data"]
+    depends_on: [web]
+    restart: unless-stopped
+```
 
-```js
-const crypto = require('crypto');
-const sig = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
-if (sig !== req.headers['x-pushnest-signature']) throw new Error('Invalid signature');
+The **worker** is a separate process that handles async delivery and scheduled notifications. Run it alongside the web app — it polls every 5 seconds.
+
+### From source
+
+```bash
+git clone https://github.com/ivucicev/PushNest.git
+cd PushNest
+npm install
+cp .env.example .env
+npx prisma migrate deploy
+npm run dev      # web app on :3000
+npm run worker   # delivery worker (separate terminal)
 ```
 
 ---
 
 ## Stack
 
-- [Next.js 16](https://nextjs.org) — app + API routes
-- [Prisma 7](https://prisma.io) + SQLite via libsql — zero-dependency database
-- [web-push](https://github.com/web-push-libs/web-push) — VAPID + push delivery
-- [jose](https://github.com/panva/jose) — Edge-compatible JWT
+Built on boring, proven technology. No moving parts.
+
+- **[Next.js 16](https://nextjs.org)** — app router, API routes, proxy
+- **[Prisma 7](https://prisma.io) + SQLite** — zero-dependency database, file-based, easy backups
+- **[web-push](https://github.com/web-push-libs/web-push)** — VAPID key signing and push delivery
+- **[jose](https://github.com/panva/jose)** — Edge-compatible JWT for auth
+
+No Redis. No external queue. No managed services required.
 
 ---
 
 ## License
 
-MIT
+MIT — use it, fork it, ship it.
