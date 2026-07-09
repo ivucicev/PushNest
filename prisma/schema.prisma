@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  apps               App[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model App {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  iconUrl         String?
+  domain          String
+  allowedOrigins  String   @default("[]")
+  vapidPublicKey  String
+  vapidPrivateKey String
+  vapidSubject    String
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKeys       ApiKey[]
+  subscriptions PushSubscription[]
+  campaigns     Campaign[]
+  notifications Notification[]
+  webhooks      Webhook[]
+
+  @@index([userId])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  appId      String
+  name       String
+  keyHash    String    @unique
+  keyPrefix  String
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId])
+}
+
+model Webhook {
+  id        String   @id @default(cuid())
+  appId     String
+  url       String
+  secret    String   // HMAC secret (stored plain, never exposed via API)
+  events    String   @default("[\"notification.sent\",\"notification.failed\",\"notification.expired\"]") // JSON
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId])
+}
+
+model PushSubscription {
+  id             String   @id @default(cuid())
+  appId          String
+  endpoint       String
+  p256dh         String
+  auth           String
+  externalUserId String?
+  deviceId       String   @default(cuid())
+  platform       String?
+  browser        String?
+  userAgent      String?
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  lastSeenAt     DateTime @default(now())
+
+  app          App           @relation(fields: [appId], references: [id], onDelete: Cascade)
+  deliveryLogs DeliveryLog[]
+
+  @@unique([appId, endpoint])
+  @@index([appId])
+  @@index([externalUserId])
+  @@index([status])
+}
+
+model Campaign {
+  id          String    @id @default(cuid())
+  appId       String
+  title       String
+  body        String
+  url         String?
+  icon        String?
+  badge       String?
+  tag         String?
+  data        String?
+  audience    String?
+  status      String    @default("DRAFT")
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  app           App            @relation(fields: [appId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+
+  @@index([appId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  appId       String
+  campaignId  String?
+  title       String
+  body        String?
+  url         String?
+  icon        String?
+  badge       String?
+  tag         String?
+  data        String?
+  source      String
+  status      String    @default("QUEUED")
+  scheduledAt DateTime?
+  totalCount  Int       @default(0)
+  sentCount   Int       @default(0)
+  failedCount Int       @default(0)
+  clickCount  Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  app          App           @relation(fields: [appId], references: [id], onDelete: Cascade)
+  campaign     Campaign?     @relation(fields: [campaignId], references: [id])
+  deliveryLogs DeliveryLog[]
+
+  @@index([appId])
+  @@index([campaignId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model DeliveryLog {
+  id             String    @id @default(cuid())
+  notificationId String
+  appId          String
+  subscriptionId String
+  status         String    @default("QUEUED")
+  statusCode     Int?
+  errorMessage   String?
+  clicked        Boolean   @default(false)
+  clickedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  sentAt         DateTime?
+
+  notification Notification     @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  subscription PushSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId])
+  @@index([subscriptionId])
+  @@index([appId])
+  @@index([status])
+  @@index([createdAt])
+}
