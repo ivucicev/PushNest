@@ -5,7 +5,7 @@ WORKDIR /app
 FROM base AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # Build
 FROM base AS builder
@@ -14,6 +14,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./prisma/dev.db
+RUN npx prisma generate
 RUN npm run build
 
 # Runner
