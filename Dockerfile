@@ -16,7 +16,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./prisma/dev.db
 RUN npx prisma generate
 RUN npm run build
-RUN node_modules/.bin/esbuild src/worker/index.ts \
+RUN npm install -g esbuild && esbuild src/worker/index.ts \
   --bundle \
   --platform=node \
   --target=node22 \
