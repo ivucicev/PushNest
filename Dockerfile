@@ -16,6 +16,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./prisma/dev.db
 RUN npx prisma generate
 RUN npm run build
+RUN node_modules/.bin/esbuild src/worker/index.ts \
+  --bundle \
+  --platform=node \
+  --target=node22 \
+  --outfile=.next/standalone/worker.js \
+  --external:@libsql/client
 
 # Runner
 FROM base AS runner
@@ -31,6 +37,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
+COPY --from=builder /app/node_modules/@libsql ./node_modules/@libsql
 
 USER nextjs
 EXPOSE 3000

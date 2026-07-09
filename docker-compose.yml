@@ -12,7 +12,7 @@ services:
 
   worker:
     image: ghcr.io/ivucicev/pushnest:main
-    command: node src/worker/index.js
+    command: node worker.js
     environment:
       DATABASE_URL: file:./data/pushnest.db
     volumes:
