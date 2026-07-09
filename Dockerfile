@@ -5,7 +5,7 @@ WORKDIR /app
 FROM base AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 COPY package*.json ./
-RUN npm ci --ignore-scripts
+RUN npm ci --ignore-scripts && node node_modules/esbuild/install.js
 
 # Build
 FROM base AS builder
@@ -16,7 +16,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./prisma/dev.db
 RUN npx prisma generate
 RUN npm run build
-RUN npm install -g esbuild && esbuild src/worker/index.ts \
+RUN node_modules/.bin/esbuild src/worker/index.ts \
   --bundle \
   --platform=node \
   --target=node22 \
