@@ -9,14 +9,3 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
-
-  worker:
-    image: ghcr.io/ivucicev/pushnest:main
-    command: node worker.js
-    environment:
-      DATABASE_URL: file:./data/pushnest.db
-    volumes:
-      - ./data:/app/data
-    depends_on:
-      - web
-    restart: unless-stopped

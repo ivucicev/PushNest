@@ -5,7 +5,7 @@ WORKDIR /app
 FROM base AS deps
 RUN apk add --no-cache libc6-compat python3 make g++
 COPY package*.json ./
-RUN npm ci --ignore-scripts && node node_modules/esbuild/install.js
+RUN npm ci --ignore-scripts
 
 # Build
 FROM base AS builder
@@ -15,7 +15,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./prisma/dev.db
 RUN npx prisma generate
-RUN npm run build && ls -lh worker.js
+RUN npm run build
 
 # Runner
 FROM base AS runner
@@ -31,7 +31,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/src/generated ./src/generated
-COPY --from=builder /app/worker.js ./worker.js
 COPY --from=builder /app/node_modules/@libsql ./node_modules/@libsql
 COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
