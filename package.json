@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npx prisma generate",
+    "build": "next build && npx prisma generate && node_modules/.bin/esbuild src/worker/index.ts --bundle --platform=node --target=node22 --outfile=worker.js --external:@libsql/client",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",

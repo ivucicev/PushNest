@@ -15,13 +15,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./prisma/dev.db
 RUN npx prisma generate
-RUN npm run build
-RUN node_modules/.bin/esbuild src/worker/index.ts \
-  --bundle \
-  --platform=node \
-  --target=node22 \
-  --outfile=worker.js \
-  --external:@libsql/client && ls -lh worker.js
+RUN npm run build && ls -lh worker.js
 
 # Runner
 FROM base AS runner
