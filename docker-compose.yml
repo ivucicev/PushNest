@@ -1,6 +1,7 @@
 services:
   web:
-    image: ghcr.io/ivucicev/pushnest:main
+    image: ghcr.io/ivucicev/pushnest:latest
+    pull_policy: always
     expose:
       - "3000"
     environment:
