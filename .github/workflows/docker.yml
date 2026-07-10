@@ -58,5 +58,8 @@ jobs:
             DATABASE_URL=file:./prisma/dev.db
 
       - name: Trigger Coolify redeploy
-        if: github.event_name != 'pull_request' && secrets.COOLIFY_WEBHOOK != ''
-        run: curl -fsSL "${{ secrets.COOLIFY_WEBHOOK }}"
+        if: github.event_name != 'pull_request'
+        run: |
+          [ -n "$COOLIFY_WEBHOOK" ] && curl -fsSL "$COOLIFY_WEBHOOK" || echo "No webhook configured"
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
