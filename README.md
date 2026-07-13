@@ -8,7 +8,7 @@ No push server. No VAPID key management. No delivery code. Just a POST request.
 [![Docker](https://img.shields.io/badge/ghcr.io-ivucicev%2Fpushnest-blue)](https://ghcr.io/ivucicev/pushnest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**Live demo:** [pushnest.ibreakthings.xyz](https://pushnest.ibreakthings.xyz) — [create a free account](https://pushnest.ibreakthings.xyz/register) to try it out.
+**Live demo:** [pushnest.ibreakthings.xyz](https://pushnest.ibreakthings.xyz) — login with `demo@demo.com` / `Demo123!` or [create a free account](https://pushnest.ibreakthings.xyz/register).
 
 ---
 
