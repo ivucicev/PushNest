@@ -7,6 +7,7 @@ services:
     environment:
       DATABASE_URL: file:///app/data/pushnest.db
       NEXT_PUBLIC_APP_URL: https://push.yourcompany.com
+      JWT_SECRET: change-this-to-a-random-secret
     volumes:
       - ./data:/app/data
     restart: unless-stopped
