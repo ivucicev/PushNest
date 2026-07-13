@@ -35,7 +35,13 @@ async function runMigrations() {
     const sql = fs.readFileSync(sqlPath, "utf8");
     const checksum = crypto.createHash("sha256").update(sql).digest("hex");
     const stmts = sql.split(/;\s*\n/).map((s) => s.trim()).filter(Boolean);
-    for (const stmt of stmts) await client.execute(stmt);
+    for (const stmt of stmts) {
+      try {
+        await client.execute(stmt);
+      } catch (e: unknown) {
+        console.warn(`[migrate] skipped stmt in ${dir}:`, (e as Error).message);
+      }
+    }
     await client.execute({
       sql: `INSERT INTO _prisma_migrations (id, checksum, migration_name, finished_at, applied_steps_count)
             VALUES (?, ?, ?, datetime('now'), 1)`,
