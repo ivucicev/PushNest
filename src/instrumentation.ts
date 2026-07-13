@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 async function runMigrations() {
   const { createClient } = await import("@libsql/client");
-  const url = process.env.DATABASE_URL ?? "file:./data/pushnest.db";
+  const url = process.env.DATABASE_URL ?? "file:///app/data/pushnest.db";
   const client = createClient({ url });
 
   await client.execute(`

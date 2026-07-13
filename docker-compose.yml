@@ -5,7 +5,7 @@ services:
     expose:
       - "3000"
     environment:
-      DATABASE_URL: file:./data/pushnest.db
+      DATABASE_URL: file:///app/data/pushnest.db
       NEXT_PUBLIC_APP_URL: https://push.yourcompany.com
     volumes:
       - ./data:/app/data
