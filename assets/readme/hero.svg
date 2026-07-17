@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="360" viewBox="0 0 1200 360"
+     role="img" aria-labelledby="hero-title hero-desc">
+  <title id="hero-title">PushNest — push notifications without the server</title>
+  <desc id="hero-desc">A curl request to the PushNest API delivering a web push notification, shown beside the product name and promise.</desc>
+
+  <rect width="1200" height="360" rx="24" fill="#F8FAFC"/>
+  <rect x="1" y="1" width="1198" height="358" rx="23" fill="none" stroke="#E2E8F0" stroke-width="1"/>
+
+  <!-- brand row -->
+  <g transform="translate(64 48)">
+    <rect width="32" height="32" rx="9" fill="#4F39F6"/>
+    <path d="M18.5 6 L9 19 H15.2 L13.5 27 L23 13 H16.6 L18.5 6 Z" fill="#FFFFFF"/>
+    <text x="44" y="22" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="19" font-weight="800" fill="#0F172B">PushNest</text>
+  </g>
+  <!-- headline (real product copy) -->
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-weight="800">
+    <text x="64" y="168" font-size="46" fill="#0F172B">Push notifications</text>
+    <text x="64" y="222" font-size="46" fill="#4F39F6">without the server.</text>
+  </g>
+
+  <text x="64" y="262" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" fill="#475569">No VAPID keys. No push infrastructure. No delivery code.</text>
+  <text x="64" y="288" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="17" fill="#475569">Just an API key and a POST request.</text>
+
+  <text x="64" y="326" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12" fill="#94A3B8" letter-spacing="0.2">NEXT.JS · PRISMA · WEB PUSH · SELF-HOSTED</text>
+
+  <!-- terminal capsule: the real /api/v1/send call -->
+  <g transform="translate(700 54)">
+    <rect width="436" height="252" rx="16" fill="#0F172B"/>
+    <circle cx="24" cy="26" r="5" fill="#EF4444"/>
+    <circle cx="42" cy="26" r="5" fill="#F59E0B"/>
+    <circle cx="60" cy="26" r="5" fill="#22C55E"/>
+    <text x="216" y="30" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="11" fill="#64748B">POST /api/v1/send</text>
+
+    <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13">
+      <text x="24" y="66" fill="#E2E8F0">curl -X POST \</text>
+      <text x="24" y="88" fill="#94A3B8">  https://you.pushnest.dev/api/v1/send \</text>
+      <text x="24" y="110" fill="#94A3B8">  -H "Authorization: Bearer sk_live_..." \</text>
+      <text x="24" y="132" fill="#94A3B8">  -d '{"title":"Order shipped"}'</text>
+    </g>
+
+    <text x="24" y="164" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="16" fill="#4F39F6">↓ delivered</text>
+
+    <rect x="24" y="178" width="388" height="56" rx="10" fill="#4F39F6"/>
+    <rect x="40" y="196" width="20" height="20" rx="6" fill="#FFFFFF" fill-opacity="0.18"/>
+    <path d="M52 200 L46.5 208.5 H50 L48.8 214 L54.5 205.5 H51 L52 200 Z" fill="#FFFFFF"/>
+    <text x="70" y="202" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">Order shipped 📦</text>
+    <text x="70" y="220" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="11" fill="#C7D2FE">Sent to 1,284 subscribers · 99.1% success</text>
+  </g>
+</svg>

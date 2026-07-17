@@ -1,14 +1,16 @@
-# PushNest
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="PushNest — push notifications without the server. Send a POST request to the API and every subscribed browser gets the notification.">
+</p>
 
-**Send web push notifications from your backend in 30 seconds.**
+<p align="center">
+  <a href="https://github.com/ivucicev/PushNest/actions"><img src="https://github.com/ivucicev/PushNest/actions/workflows/docker.yml/badge.svg" alt="Build status"></a>
+  <a href="https://ghcr.io/ivucicev/pushnest"><img src="https://img.shields.io/badge/ghcr.io-ivucicev%2Fpushnest-blue" alt="Docker image"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
+</p>
 
-No push server. No VAPID key management. No delivery code. Just a POST request.
-
-[![Build](https://github.com/ivucicev/PushNest/actions/workflows/docker.yml/badge.svg)](https://github.com/ivucicev/PushNest/actions)
-[![Docker](https://img.shields.io/badge/ghcr.io-ivucicev%2Fpushnest-blue)](https://ghcr.io/ivucicev/pushnest)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-
-**Live demo:** [pushnest.ibreakthings.xyz](https://pushnest.ibreakthings.xyz) — login with `demo@demo.com` / `Demo123!` or [create a free account](https://pushnest.ibreakthings.xyz/register).
+<p align="center">
+  <b>Live demo:</b> <a href="https://pushnest.ibreakthings.xyz">pushnest.ibreakthings.xyz</a> — login with <code>demo@demo.com</code> / <code>Demo123!</code> or <a href="https://pushnest.ibreakthings.xyz/register">create a free account</a>.
+</p>
 
 ---
 
@@ -18,11 +20,11 @@ curl -X POST https://your-pushnest.com/api/v1/send \
   -d '{ "title": "Order shipped 📦", "body": "Your order is on its way!" }'
 ```
 
-That's it. Every subscribed browser gets the notification.
+That's it. Every subscribed browser gets the notification — no push server to run.
 
 ---
 
-![PushNest homepage](screenshots/screenshot-homepage.png)
+![PushNest dashboard homepage, showing the send-notification panel and live delivery stats](screenshots/screenshot-homepage.png)
 
 ## Why PushNest
 
@@ -57,7 +59,7 @@ Self-host it. Own your data. Zero vendor lock-in.
 
 ---
 
-![Apps dashboard](screenshots/screenshot-apps.png)
+![PushNest apps list, showing two apps with live subscriber and notification counts](screenshots/screenshot-apps.png)
 
 ## Get started in 5 minutes
 
@@ -188,7 +190,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ## Webhooks
 
-![Webhooks dashboard](screenshots/screenshot-webhooks.png)
+![PushNest webhooks panel, showing endpoint setup, event checkboxes, and the HMAC signature verification snippet](screenshots/screenshot-webhooks.png)
 
 Get notified on every delivery event. PushNest signs every request with HMAC-SHA256.
 
